@@ -6,6 +6,7 @@ import {
     getAllGames,
     getAllGameIds,
     getGameById,
+    searchGamesByTitle,
 } from './games';
 
 async function seedGames(db: Database, count: number): Promise<void> {
@@ -50,6 +51,18 @@ describe('games data-access helpers', () => {
         const ids = await getAllGameIds(db);
         const all = await getAllGames(db);
         expect(ids).toEqual(all.map((g) => g.id));
+    });
+
+    it('searches games by title in a case-insensitive way', async () => {
+        await seedGames(db, 3);
+        const results = await searchGamesByTitle(db, 'game 02');
+        expect(results.map((game) => game.title)).toEqual(['Game 02']);
+    });
+
+    it('returns all games when the search is empty', async () => {
+        await seedGames(db, 3);
+        const results = await searchGamesByTitle(db, '   ');
+        expect(results.map((game) => game.title)).toEqual(['Game 01', 'Game 02', 'Game 03']);
     });
 
     it('fetches a single game by id', async () => {
