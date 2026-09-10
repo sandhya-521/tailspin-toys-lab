@@ -24,4 +24,22 @@ test.describe('Home Page', () => {
     // Check that the welcome message is present using more specific locator
     await expect(page.getByText('Find your next game! And maybe even back one! Explore our collection!')).toBeVisible();
   });
+
+  test('should filter games by title as the user types', async ({ page }) => {
+    const searchInput = page.getByRole('searchbox', { name: 'Search by title' });
+
+    await searchInput.fill('Pipeline');
+
+    await expect(page.locator('[data-testid="game-card"]:not([hidden])')).toHaveCount(1);
+    await expect(page.getByRole('link', { name: /Pipeline Conquest/i })).toBeVisible();
+  });
+
+  test('should show an empty state when no games match the search', async ({ page }) => {
+    const searchInput = page.getByRole('searchbox', { name: 'Search by title' });
+
+    await searchInput.fill('zzzz-not-a-game');
+
+    await expect(page.getByTestId('games-empty-state')).toBeVisible();
+    await expect(page.getByTestId('games-empty-state-text')).toContainText('No games match "zzzz-not-a-game".');
+  });
 });
